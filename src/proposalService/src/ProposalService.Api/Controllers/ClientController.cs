@@ -1,12 +1,11 @@
 ﻿using Insurence.Platform.Common.Wrappers;
 using Microsoft.AspNetCore.Mvc;
-using ProposalService.Api.Controllers.Base;
 using ProposalService.Application.DataTransferObjects.Requests;
 using ProposalService.Application.DataTransferObjects.Responses;
 using ProposalService.Application.Services.Interfaces;
 using ProposalService.Application.Validations;
 using ProposalService.Domain.Exceptions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+
 
 namespace ProposalService.Api.Controllers;
 
@@ -51,7 +50,7 @@ public sealed class ClientController(
     /// <remarks>Esta ação retorna um 201 Created em caso de sucesso. Se ocorrer um erro de validação de domínio, retorna um 400 Bad Request com detalhes do erro. Para erros inesperados, retorna um 500 Internal Server Error.</remarks>
     /// <param name="request">O objeto de requisição contendo as informações necessárias para criar o cliente. Não pode ser nulo.</param>
     /// <param name="cancellationToken">Um token de cancelamento que pode ser utilizado para cancelar a operação.</param>
-    /// <returns>Um ActionResult contendo um ResponseDefault<ClientResponse> com os detalhes do cliente criado, se bem-sucedido. Retorna uma resposta de bad request se a requisição for inválida, ou uma resposta de erro interno do servidor se ocorrer um erro inesperado.</returns>
+    /// <returns>Um ActionResult contendo um ResponseDefault com os detalhes do cliente criado, se bem-sucedido. Retorna uma resposta de bad request se a requisição for inválida, ou uma resposta de erro interno do servidor se ocorrer um erro inesperado.</returns>
     [HttpPost]
     [ProducesResponseType(typeof(ResponseDefault<ClientResponse>), StatusCodes.Status201Created)]
     [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Post))]
@@ -61,16 +60,16 @@ public sealed class ClientController(
     {
         try
         {
-            var response = await clientService.CreateAsync(request, cancellationToken);
 
-            var validationResult = ValidateRequest<CreateClientValidation, CreateClientRequest>(request);
+            var validationResult = ValidateRequest<CreateClientRequestValidation, CreateClientRequest>(request);
             if (!validationResult.IsValid)
             {
-                Logger.LogWarning("Ocorreram erros de validação ao criar fornecedor: {Errors}",
+                Logger.LogWarning("Ocorreram erros de validação ao criar cliente: {Errors}",
                     string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
                 return ValidationResponseError<ClientResponse>(validationResult);
             }
 
+            var response = await clientService.CreateAsync(request, cancellationToken);
             return CreateResponse(response);
         }
         catch (DomainException dex)

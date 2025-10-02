@@ -1,4 +1,5 @@
 using Insurence.Platform.Common.Helpers;
+using Insurence.Platform.Common.Middlewares;
 using ProposalService.Api.Extensions;
 using ProposalService.Infrastructure.Extensions;
 
@@ -8,21 +9,25 @@ builder.Services.AddControllers(options =>
 {
     options.Conventions.Add(new LowercaseControllerModelConvention());
 });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
+
 if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
     builder.Services.AddSwaggerDocumentation();
+
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsProduction())
+{
+    app.UseMiddleware<RequestResponseLoggingMiddleware>();
     app.UseSwaggerDocumentation();
+}
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 

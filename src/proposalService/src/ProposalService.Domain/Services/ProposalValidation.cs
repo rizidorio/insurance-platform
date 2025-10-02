@@ -1,7 +1,7 @@
 ﻿using ProposalService.Domain.Entities;
 using ProposalService.Domain.Enums;
 using ProposalService.Domain.Exceptions;
-using ProposalService.Domain.Services.Interface;
+using ProposalService.Domain.Interfaces.Services;
 
 namespace ProposalService.Domain.Services;
 

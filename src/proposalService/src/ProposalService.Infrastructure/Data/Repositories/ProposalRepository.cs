@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProposalService.Domain.Entities;
-using ProposalService.Domain.Interfaces;
+using ProposalService.Domain.Interfaces.Repositories;
 using ProposalService.Infrastructure.Data.Context;
 using System.Linq.Expressions;
 
@@ -28,7 +28,9 @@ internal sealed class ProposalRepository(
     /// <inheritdoc/>
     public async Task<Proposal?> GetByExternalIdAsync(Guid externalId, CancellationToken cancellationToken)
     {
-        return await context.Proposals.FirstOrDefaultAsync(x => x.ExternalId == externalId, cancellationToken);
+        return await context.Proposals
+            .Include(x => x.Client)
+            .FirstOrDefaultAsync(x => x.ExternalId == externalId, cancellationToken);
     }
 
     /// <inheritdoc/>

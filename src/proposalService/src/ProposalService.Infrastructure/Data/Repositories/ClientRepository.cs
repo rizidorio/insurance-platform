@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProposalService.Domain.Entities;
-using ProposalService.Domain.Interfaces;
+using ProposalService.Domain.Interfaces.Repositories;
 using ProposalService.Infrastructure.Data.Context;
 using System.Linq.Expressions;
 

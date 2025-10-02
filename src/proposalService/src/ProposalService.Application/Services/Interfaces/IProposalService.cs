@@ -45,6 +45,16 @@ public interface IProposalService
     Task<ResponseDefault<ProposalResponse>> GetByExternalIdAsync(GetProposalByIdRequest request, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Recupera assíncronamente o status da proposta associado ao identificador externo especificado.
+    /// </summary>
+    /// <param name="request">Objeto contendo o identificador externo e parâmetros relacionados usados para localizar a proposta. Não pode ser nulo.</param>
+    /// <param name="cancellationToken">Token que pode ser utilizado para cancelar a operação assíncrona.</param>
+    /// <returns>
+    /// Uma tarefa que representa a operação assíncrona. O resultado da tarefa contém um objeto de resposta com as informações de status da proposta, se encontrada; caso contrário, a resposta indica que o status não foi encontrado.
+    /// </returns>
+    Task<ResponseDefault<ProposalStatusResponse>> GetStatusByExternalIdAsync(GetProposalByIdRequest request, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Cria uma nova proposta de forma assíncrona utilizando os dados especificados na requisição.
     /// </summary>
     /// <param name="request">Detalhes da proposta a ser criada. Não pode ser nulo.</param>

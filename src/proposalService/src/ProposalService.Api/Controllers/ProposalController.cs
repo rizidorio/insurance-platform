@@ -1,6 +1,5 @@
 ﻿using Insurence.Platform.Common.Wrappers;
 using Microsoft.AspNetCore.Mvc;
-using ProposalService.Api.Controllers.Base;
 using ProposalService.Application.DataTransferObjects.Requests;
 using ProposalService.Application.DataTransferObjects.Responses;
 using ProposalService.Application.Services.Interfaces;
@@ -77,12 +76,43 @@ public sealed class ProposalController(
     }
 
     /// <summary>
+    /// Recupera o status de uma proposta identificada pelo ID externo especificado.
+    /// </summary>
+    /// <remarks>Este método é normalmente utilizado para consultar o status atual de uma proposta usando seu identificador externo.
+    /// A resposta inclui detalhes do status se a proposta existir. Se ocorrer um erro durante o processamento,
+    /// uma resposta de erro interno do servidor é retornada.</remarks>
+    /// <param name="externalId">O identificador externo único da proposta para recuperar o status.</param>
+    /// <param name="cancellationToken">Um token de cancelamento que pode ser usado para cancelar a operação.</param>
+    /// <returns>Um resultado de ação contendo uma resposta com as informações de status da proposta. Retorna uma resposta 200 OK se a
+    /// proposta for encontrada; caso contrário, retorna uma resposta de erro.</returns>
+    [HttpGet("{externalId:guid}/status")]
+    [ProducesResponseType(typeof(ResponseDefault<ProposalStatusResponse>), StatusCodes.Status200OK)]
+    [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Get))]
+    public async Task<ActionResult<ResponseDefault<ProposalStatusResponse>>> GetStatusByExternalIdAsync(
+        [FromRoute] Guid externalId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var request = new GetProposalByIdRequest(externalId);
+            var response = await proposalService.GetStatusByExternalIdAsync(request, cancellationToken);
+            return CreateResponse(response);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Erro ao obter status da proposta por ID");
+            return CreateResponse(
+                ResponseDefault<ProposalStatusResponse>.CreateInternalServerErrorResponse("Ocorreu um erro ao processar sua requisição."));
+        }
+    }
+
+    /// <summary>
     /// Recupera todas as propostas associadas ao número de documento do cliente especificado.
     /// </summary>
     /// <remarks>Este endpoint retorna todas as propostas vinculadas ao número de documento do cliente fornecido. Se nenhuma proposta for encontrada, a resposta conterá uma lista vazia. A operação pode retornar erro interno do servidor se ocorrer uma exceção inesperada.</remarks>
     /// <param name="documentNumber">O número de documento do cliente para o qual as propostas devem ser recuperadas. Deve conter apenas caracteres alfabéticos.</param>
     /// <param name="cancellationToken">Um token de cancelamento que pode ser usado para cancelar a operação.</param>
-    /// <returns>Um <see cref="ActionResult"/> contendo um <see cref="ResponseDefault{IList{ProposalResponse}}"/> com a lista de propostas para o cliente especificado. Retorna 200 OK com as propostas se encontradas; caso contrário, retorna uma resposta de erro apropriada.</returns>
+    /// <returns>Um <see cref="ActionResult"/> contendo um ResponseDefault com a lista de propostas para o cliente especificado. Retorna 200 OK com as propostas se encontradas; caso contrário, retorna uma resposta de erro apropriada.</returns>
     [HttpGet("client/{documentNumber:alpha}")]
     [ProducesResponseType(typeof(ResponseDefault<IList<ProposalResponse>>), StatusCodes.Status200OK)]
     [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Get))]
@@ -150,10 +180,10 @@ public sealed class ProposalController(
     {
         try
         {
-            var validationResult = ValidateRequest<CreateProposalValidation, CreateProposalRequest>(request);
+            var validationResult = ValidateRequest<CreateProposalRequestValidation, CreateProposalRequest>(request);
             if (!validationResult.IsValid)
             {
-                Logger.LogWarning("Ocorreram erros de validação ao criar fornecedor: {Errors}",
+                Logger.LogWarning("Ocorreram erros de validação ao criar proposta: {Errors}",
                     string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage)));
                 return ValidationResponseError<ProposalResponse>(validationResult);
             }
@@ -163,7 +193,7 @@ public sealed class ProposalController(
         }
         catch (DomainException dex)
         {
-            Logger.LogWarning(dex, "Erro de domínio ao criar cliente: {Message}", dex.Message);
+            Logger.LogWarning(dex, "Erro de domínio ao criar proposta: {Message}", dex.Message);
             var erros = new List<Error>
             {
                 new("DomainError", dex.Message)

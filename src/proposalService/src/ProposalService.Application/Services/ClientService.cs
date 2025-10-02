@@ -6,8 +6,8 @@ using ProposalService.Application.DataTransferObjects.Requests;
 using ProposalService.Application.DataTransferObjects.Responses;
 using ProposalService.Application.Services.Interfaces;
 using ProposalService.Domain.Entities;
-using ProposalService.Domain.Interfaces;
-using ProposalService.Domain.Services.Interface;
+using ProposalService.Domain.Interfaces.Repositories;
+using ProposalService.Domain.Interfaces.Services;
 using System.Linq.Expressions;
 
 namespace ProposalService.Application.Services;

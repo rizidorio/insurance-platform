@@ -8,8 +8,8 @@ using ProposalService.Application.Services.Interfaces;
 using ProposalService.Domain.Entities;
 using ProposalService.Domain.Enums;
 using ProposalService.Domain.Extensions;
-using ProposalService.Domain.Interfaces;
-using ProposalService.Domain.Services.Interface;
+using ProposalService.Domain.Interfaces.Repositories;
+using ProposalService.Domain.Interfaces.Services;
 using System.Linq.Expressions;
 
 namespace ProposalService.Application.Services;
@@ -139,6 +139,25 @@ public sealed class ProposalService(
 
         logger.LogInformation("Proposta com ID {ProposalId} recuperada com sucesso.", request.ProposalId);
         return ResponseDefault<ProposalResponse>.CreateSuccessResponse((ProposalResponse)proposal);
+    }
+
+    public async Task<ResponseDefault<ProposalStatusResponse>> GetStatusByExternalIdAsync(GetProposalByIdRequest request, CancellationToken cancellationToken)
+    {
+        var proposal = await proposalRepository.GetByExternalIdAsync(request.ProposalId, cancellationToken);
+
+        if (proposal is null)
+        {
+            logger.LogWarning("Proposta com ID {ProposalId} não encontrada ao buscar status.", request.ProposalId);
+            return ResponseDefault<ProposalStatusResponse>.CreateNotFoundResponse("Proposta não encontrada.");
+        }
+
+        var response = new ProposalStatusResponse(
+            ExternalId: proposal.ExternalId,
+            ClientId: proposal.Client?.ExternalId ?? Guid.Empty,
+            Status: proposal.Status);
+
+        logger.LogInformation("Status da proposta com ID {ProposalId} recuperado com sucesso. Status: {Status}.", request.ProposalId, proposal.Status);
+        return ResponseDefault<ProposalStatusResponse>.CreateSuccessResponse(response);
     }
 
     /// <inheritdoc/>
