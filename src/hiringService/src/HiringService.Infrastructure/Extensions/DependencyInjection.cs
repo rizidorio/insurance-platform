@@ -9,6 +9,7 @@ using HiringService.Domain.Services;
 using HiringService.Infrastructure.Data.Contexts;
 using HiringService.Infrastructure.Data.Repositories;
 using HiringService.Infrastructure.Services.External;
+using Insurence.Platform.Common.Messaging.RabbitMq.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IContractValidation, ContractValidation>();
         services.AddScoped<ICalculateEffectiveDateEnd, CalculateEffectiveDateEnd>();
 
+        services.AddRabbitMq(configuration);
         services.AddValidatorsFromAssembly(typeof(CreateContractRequestValidation).Assembly);
         return services;
     }

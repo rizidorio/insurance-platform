@@ -19,6 +19,11 @@ public sealed class Proposal
     public Guid ClientId { get; init; }
 
     /// <summary>
+    /// Obtém o e-mail do cliente associado a esta instância, se disponível.
+    /// </summary>
+    public string? ClientEmail { get; init; }
+
+    /// <summary>
     /// Obtém o status atual da proposta.
     /// </summary>
     public ProposalStatus Status { get; init; }
