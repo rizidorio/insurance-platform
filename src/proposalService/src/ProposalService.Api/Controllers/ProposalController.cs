@@ -113,7 +113,7 @@ public sealed class ProposalController(
     /// <param name="documentNumber">O número de documento do cliente para o qual as propostas devem ser recuperadas. Deve conter apenas caracteres alfabéticos.</param>
     /// <param name="cancellationToken">Um token de cancelamento que pode ser usado para cancelar a operação.</param>
     /// <returns>Um <see cref="ActionResult"/> contendo um ResponseDefault com a lista de propostas para o cliente especificado. Retorna 200 OK com as propostas se encontradas; caso contrário, retorna uma resposta de erro apropriada.</returns>
-    [HttpGet("client/{documentNumber:alpha}")]
+    [HttpGet("client/{documentNumber}")]
     [ProducesResponseType(typeof(ResponseDefault<IList<ProposalResponse>>), StatusCodes.Status200OK)]
     [ApiConventionMethod(typeof(DefaultApiConventions), nameof(DefaultApiConventions.Get))]
     public async Task<ActionResult<ResponseDefault<IList<ProposalResponse>>>> GetByClientDocumentNumberAsync(

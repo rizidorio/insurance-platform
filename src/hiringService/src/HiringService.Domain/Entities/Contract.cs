@@ -116,8 +116,8 @@ public sealed class Contract
     => new(
         proposalId,
         clientId,
-        effectiveDateStart,
-        effectiveDateEnd);
+        effectiveDateStart.ToUniversalTime(),
+        effectiveDateEnd.ToUniversalTime());
 
     /// <summary>
     /// Desativa a instância atual, marcando-a como inativa e atualizando o timestamp de última modificação.

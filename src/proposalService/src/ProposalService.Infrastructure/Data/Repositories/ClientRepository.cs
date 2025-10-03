@@ -28,7 +28,7 @@ internal sealed class ClientRepository(
     {
         return await context.Clients
             .Include(c => c.Proposals)
-            .FirstOrDefaultAsync(c => c.DocumentNumber.ToString() == documentNumber, cancellationToken);
+            .FirstOrDefaultAsync(c => c.DocumentNumber.Value == documentNumber, cancellationToken);
     }
 
     /// <inheritdoc/>

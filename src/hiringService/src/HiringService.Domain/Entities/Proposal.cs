@@ -26,5 +26,5 @@ public sealed class Proposal
     /// <summary>
     /// O construtor é privado para evitar a instanciação direta.
     /// </summary>
-    private Proposal() { }
+    public Proposal() { }
 }

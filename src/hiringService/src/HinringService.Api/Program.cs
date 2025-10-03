@@ -28,7 +28,7 @@ public class Program
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsProduction())
         {
-            app.UseMiddleware<RequestResponseLoggingMiddleware>();
+           //app.UseMiddleware<RequestResponseLoggingMiddleware>();
             app.UseSwaggerDocumentation();
         }
 
