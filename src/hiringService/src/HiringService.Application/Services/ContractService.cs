@@ -7,6 +7,9 @@ using HiringService.Domain.Interfaces.Repositories;
 using HiringService.Domain.Interfaces.Services;
 using Insurence.Platform.Common.Extensions;
 using Insurence.Platform.Common.Helpers;
+using Insurence.Platform.Common.Messaging.RabbitMq.Interfaces.Notification;
+using Insurence.Platform.Common.Messaging.RabbitMq.Messages;
+using Insurence.Platform.Common.Notification.Enums;
 using Insurence.Platform.Common.Wrappers;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
@@ -19,6 +22,7 @@ public sealed class ContractService(
     ICalculateEffectiveDateEnd calculateEffectiveDateEnd,
     IContractRepository contractRepository,
     IProposalClientService proposalClientService,
+    INotificationMessagePublish notificationMessagePublish,
     ILogger<ContractService> logger) : IContractService
 {
     /// <inheritdoc/>
@@ -54,6 +58,16 @@ public sealed class ContractService(
 
         await contractRepository.CreateAsync(contract, cancellationToken);
         logger.LogInformation("Contrato com ID {ContractId} criado com sucesso para a proposta {ProposalId}.", contract.Id, request.ProposalId);
+
+        var notificationMessage = new NotificationMessage(
+            CorrelationId: Guid.NewGuid(),
+            NotificationType: NotificationType.CreateContract,
+            NotificationChannel: NotificationChannel.Email,
+            Subject: "Contrato Criado com Sucesso",
+            Body: $"Seu contrato com ID {contract.Id} foi criado com sucesso e é válido de {contract.EffectiveDateStart:dd/MM/yyyy} até {contract.EffectiveDateEnd:dd/MM/yyyy}.",
+            Email: proposal.ClientEmail);
+
+        await notificationMessagePublish.PublishAsync(notificationMessage, cancellationToken);
 
         var response = (ContractResponse)contract;
         return ResponseDefault<ContractResponse>.CreateCreatedResponse(response, "Contrato criado com sucesso.");

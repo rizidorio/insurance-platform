@@ -1,5 +1,8 @@
 ﻿using Insurence.Platform.Common.Extensions;
 using Insurence.Platform.Common.Helpers;
+using Insurence.Platform.Common.Messaging.RabbitMq.Interfaces.Notification;
+using Insurence.Platform.Common.Messaging.RabbitMq.Messages;
+using Insurence.Platform.Common.Notification.Enums;
 using Insurence.Platform.Common.Wrappers;
 using Microsoft.Extensions.Logging;
 using ProposalService.Application.DataTransferObjects.Requests;
@@ -21,6 +24,7 @@ public sealed class ProposalService(
     IRiskAnalysisService riskAnalysisService,
     IClientRepository clientRepository,
     IProposalRepository proposalRepository,
+    INotificationMessagePublish notificationMessagePublish,
     ILogger<ProposalService> logger) : IProposalService
 {
     /// <inheritdoc/>
@@ -42,6 +46,17 @@ public sealed class ProposalService(
 
         proposal.Approve();
         await proposalRepository.UpdateAsync(proposal, cancellationToken);
+
+        var notificationMessage = new NotificationMessage(
+            CorrelationId: Guid.NewGuid(),
+            NotificationType: NotificationType.ApproveProposal,
+            NotificationChannel: NotificationChannel.Email,
+            Subject: "Proposta Aprovada",
+            Body: $"Sua proposta com ID {proposal.ExternalId} foi aprovada com sucesso.",
+            Email: proposal.Client?.Email.ToString() ?? string.Empty,
+            PhoneNumber: null);
+
+        await notificationMessagePublish.PublishAsync(notificationMessage, cancellationToken);
 
         logger.LogInformation("Proposta com ID {ProposalId} aprovada com sucesso.", request.ProposalId);
         return ResponseDefault<ProposalResponse>.CreateSuccessResponse((ProposalResponse)proposal);
@@ -82,6 +97,13 @@ public sealed class ProposalService(
         var recomendation = riskAnalysisService.GeraneteRecommendation(proposal, client);
         logger.LogInformation("Nível de risco analisado: {RiskLevel}. Recomendação: {Recomendation}", riskLevel, recomendation);
 
+        var notificationType = riskLevel switch
+        {
+            RiskLevel.Low => NotificationType.ApproveProposal,
+            RiskLevel.High => NotificationType.RejectProposal,
+            _ => NotificationType.CreateProposal
+        };
+
         switch (riskLevel)
         {
             case RiskLevel.Low:
@@ -100,6 +122,19 @@ public sealed class ProposalService(
         }
 
         await proposalRepository.AddAsync(proposal, cancellationToken);
+
+        var notificationMessage = new NotificationMessage(
+            CorrelationId: Guid.NewGuid(),
+            NotificationType: notificationType,
+            NotificationChannel: NotificationChannel.Email,
+            Subject: notificationType == NotificationType.RejectProposal ? "Proposta Rejeitada" : "Proposta Criada com Sucesso",
+            Body: notificationType == NotificationType.RejectProposal ?
+                $"Sua proposta com ID {proposal.ExternalId} foi rejeitada. Motivo: {recomendation}" :
+                $"Sua proposta com ID {proposal.ExternalId} foi criada com sucesso e está atualmente '{proposal.Status}'.",
+            Email: client.Email.ToString(),
+            PhoneNumber: null);
+
+        await notificationMessagePublish.PublishAsync(notificationMessage, cancellationToken);
 
         logger.LogInformation("Proposta com ID {ProposalId} criada com sucesso para o cliente ID {ClientId}.", proposal.ExternalId, client.Id);
 
@@ -154,6 +189,7 @@ public sealed class ProposalService(
         var response = new ProposalStatusResponse(
             ExternalId: proposal.ExternalId,
             ClientId: proposal.Client?.ExternalId ?? Guid.Empty,
+            ClientEmail: proposal.Client?.Email.ToString() ?? string.Empty,
             Status: proposal.Status);
 
         logger.LogInformation("Status da proposta com ID {ProposalId} recuperado com sucesso. Status: {Status}.", request.ProposalId, proposal.Status);
@@ -243,6 +279,17 @@ public sealed class ProposalService(
 
         proposal.Reject(request.Reason);
         await proposalRepository.UpdateAsync(proposal, cancellationToken);
+
+        var notificationMessage = new NotificationMessage(
+            CorrelationId: Guid.NewGuid(),
+            NotificationType: NotificationType.RejectProposal,
+            NotificationChannel: NotificationChannel.Email,
+            Subject: "Proposta Rejeitada",
+            Body: $"Sua proposta com ID {proposal.ExternalId} foi rejeitada. Motivo: {request.Reason}",
+            Email: proposal.Client?.Email.ToString() ?? string.Empty,
+            PhoneNumber: null);
+
+        await notificationMessagePublish.PublishAsync(notificationMessage, cancellationToken);
 
         logger.LogInformation("Proposta com ID {ProposalId} rejeitada com sucesso.", request.ProposalId);
 

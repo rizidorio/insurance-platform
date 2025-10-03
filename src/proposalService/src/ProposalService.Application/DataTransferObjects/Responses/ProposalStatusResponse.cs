@@ -11,4 +11,5 @@ namespace ProposalService.Application.DataTransferObjects.Responses;
 public sealed record ProposalStatusResponse(
     Guid ExternalId,
     Guid ClientId,
+    string? ClientEmail,
     ProposalStatus Status);

@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Insurence.Platform.Common.Messaging.RabbitMq.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IProposalValidation, ProposalValidation>();
         services.AddScoped<IRiskAnalysisService, RiskAnalysisService>();
 
+        services.AddRabbitMq(configuration);
         services.AddValidatorsFromAssembly(typeof(CreateProposalRequestValidation).Assembly);
         return services;
     }
