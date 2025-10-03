@@ -78,7 +78,7 @@ public sealed class ProposalService(
             request.Amount);
         proposalValidation.Validate(proposal);
                 
-        var riskLevel = riskAnalysisService.AnalyzeRiskLevel(proposal, client);
+        RiskLevel riskLevel = riskAnalysisService.AnalyzeRiskLevel(proposal, client);
         var recomendation = riskAnalysisService.GeraneteRecommendation(proposal, client);
         logger.LogInformation("Nível de risco analisado: {RiskLevel}. Recomendação: {Recomendation}", riskLevel, recomendation);
 
@@ -103,7 +103,7 @@ public sealed class ProposalService(
 
         logger.LogInformation("Proposta com ID {ProposalId} criada com sucesso para o cliente ID {ClientId}.", proposal.ExternalId, client.Id);
 
-        return ResponseDefault<ProposalResponse>.CreateSuccessResponse((ProposalResponse)proposal);
+        return ResponseDefault<ProposalResponse>.CreateCreatedResponse((ProposalResponse)proposal, "Proposta criada com sucesso.");
     }
 
     /// <inheritdoc/>

@@ -30,7 +30,7 @@ public sealed class Proposal
     /// <summary>
     /// Obtém o cliente associado a esta instância.
     /// </summary>
-    public Client? Client { get; init; } = default!;
+    public Client? Client { get; private set; } = default!;
 
     /// <summary>
     /// Obtém o valor monetário associado à transação.
@@ -136,5 +136,14 @@ public sealed class Proposal
     {
         Status = ProposalStatus.InAnalysis;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Define a instância de cliente utilizada por este objeto.
+    /// </summary>
+    /// <param name="client">O cliente a ser associado a este objeto. Não pode ser nulo.</param>
+    public void SetClient(Client client)
+    {
+        Client = client;
     }
 }

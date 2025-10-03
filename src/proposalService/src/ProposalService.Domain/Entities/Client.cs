@@ -99,7 +99,8 @@ public sealed class Client
         var nameVo = new Name(name);
         var documentNumberVo = new DocumentNumber(documentNumber);
         var emailVo = new Email(email);
-        return new Client(nameVo, documentNumberVo, emailVo, birthDate);
+        var birthDateUtc = birthDate.HasValue ? DateTime.SpecifyKind(birthDate.Value, DateTimeKind.Utc) : (DateTime?)null;
+        return new Client(nameVo, documentNumberVo, emailVo, birthDateUtc);
     }
 
     /// <summary>

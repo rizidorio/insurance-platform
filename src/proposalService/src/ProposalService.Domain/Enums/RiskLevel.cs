@@ -11,15 +11,15 @@ public enum RiskLevel
     /// <summary>
     /// Indica um nível baixo ou configuração de prioridade baixa.
     /// </summary>
-    Low = 1,
+    Low = 0,
 
     /// <summary>
     /// Representa um nível médio ou valor intermediário dentro da enumeração.
     /// </summary>
-    Medium = 2,
+    Medium = 1,
 
     /// <summary>
     /// Representa um nível de prioridade alto.
     /// </summary>
-    High = 3
+    High = 2
 }

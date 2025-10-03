@@ -3,31 +3,39 @@ using HiringService.Infrastructure.Extensions;
 using Insurence.Platform.Common.Helpers;
 using Insurence.Platform.Common.Middlewares;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace HiringService.Api;
 
-builder.Services.AddControllers(options =>
+public class Program
 {
-    options.Conventions.Add(new LowercaseControllerModelConvention());
-});
+    private static async Task Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer();
-if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
-    builder.Services.AddSwaggerDocumentation();
+        builder.Services.AddControllers(options =>
+        {
+            options.Conventions.Add(new LowercaseControllerModelConvention());
+        });
 
-builder.Services.AddInfrastructure(builder.Configuration);
+        builder.Services.AddEndpointsApiExplorer();
+        if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
+            builder.Services.AddSwaggerDocumentation();
 
-var app = builder.Build();
-app.UseMiddleware<ExceptionHandlerMiddleware>();
+        builder.Services.AddInfrastructure(builder.Configuration);
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsProduction())
-{
-    app.UseMiddleware<RequestResponseLoggingMiddleware>();
-    app.UseSwaggerDocumentation();
+        var app = builder.Build();
+        app.UseMiddleware<ExceptionHandlerMiddleware>();
+
+        // Configure the HTTP request pipeline.
+        if (!app.Environment.IsProduction())
+        {
+            app.UseMiddleware<RequestResponseLoggingMiddleware>();
+            app.UseSwaggerDocumentation();
+        }
+
+        app.UseHttpsRedirection();
+
+        app.MapControllers();
+
+        await app.RunAsync();
+    }
 }
-
-app.UseHttpsRedirection();
-
-app.MapControllers();
-
-await app.RunAsync();

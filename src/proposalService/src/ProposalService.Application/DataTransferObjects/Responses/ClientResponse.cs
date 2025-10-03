@@ -22,10 +22,13 @@ public sealed record ClientResponse(
     /// </summary>
     /// <remarks>Este operador permite conversão direta entre entidades de cliente do domínio e modelos de resposta da API. Todas as propriedades relevantes são mapeadas diretamente; certifique-se de que a entidade de origem contenha dados válidos para serialização.</remarks>
     /// <param name="client">A entidade de cliente a ser convertida. Não pode ser nula.</param>
-    public static implicit operator ClientResponse(Client client) => new(
-        client.ExternalId,
-        client.Name.ToString(),
-        client.DocumentNumber.ToString(),
-        client.Email?.ToString(),
-        client.BirthDate);
-}
+    public static implicit operator ClientResponse(Client? client)
+    {
+        return new ClientResponse(
+            client?.ExternalId ?? Guid.Empty,
+            client?.Name.ToString() ?? string.Empty,
+            client?.DocumentNumber.ToString() ?? string.Empty,
+            client?.Email?.ToString(),
+            client?.BirthDate);
+    }
+    }

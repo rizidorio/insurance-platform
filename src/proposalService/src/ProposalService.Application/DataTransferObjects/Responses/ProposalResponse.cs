@@ -31,7 +31,7 @@ public sealed record ProposalResponse(
     public static implicit operator ProposalResponse(Proposal proposal)
         => new(
             proposal.ExternalId,
-            (ClientResponse)proposal.Client!,
+            (ClientResponse)proposal.Client,
             proposal.Amount,
             proposal.InsuranceType.ToDisplayName(),
             proposal.Status.ToDisplayName(),

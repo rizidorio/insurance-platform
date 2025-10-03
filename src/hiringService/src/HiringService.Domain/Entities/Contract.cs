@@ -114,8 +114,8 @@ public sealed class Contract
         DateTime effectiveDateStart,
         DateTime effectiveDateEnd)
     => new(
-        clientId,
         proposalId,
+        clientId,
         effectiveDateStart,
         effectiveDateEnd);
 

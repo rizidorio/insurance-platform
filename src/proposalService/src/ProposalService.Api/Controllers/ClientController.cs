@@ -60,7 +60,6 @@ public sealed class ClientController(
     {
         try
         {
-
             var validationResult = ValidateRequest<CreateClientRequestValidation, CreateClientRequest>(request);
             if (!validationResult.IsValid)
             {

@@ -3,32 +3,44 @@ using Insurence.Platform.Common.Middlewares;
 using ProposalService.Api.Extensions;
 using ProposalService.Infrastructure.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace ProposalService.Api;
 
-builder.Services.AddControllers(options =>
+public class Program
 {
-    options.Conventions.Add(new LowercaseControllerModelConvention());
-});
+    protected Program()
+    {
+    }
 
-builder.Services.AddEndpointsApiExplorer();
+    private static async Task Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
-    builder.Services.AddSwaggerDocumentation();
+        builder.Services.AddControllers(options =>
+        {
+            options.Conventions.Add(new LowercaseControllerModelConvention());
+        });
 
-builder.Services.AddInfrastructure(builder.Configuration);
+        builder.Services.AddEndpointsApiExplorer();
 
-var app = builder.Build();
-app.UseMiddleware<ExceptionHandlerMiddleware>();
+        if (builder.Environment.IsDevelopment() || builder.Environment.IsStaging())
+            builder.Services.AddSwaggerDocumentation();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsProduction())
-{
-    app.UseMiddleware<RequestResponseLoggingMiddleware>();
-    app.UseSwaggerDocumentation();
+        builder.Services.AddInfrastructure(builder.Configuration);
+
+        var app = builder.Build();
+        app.UseMiddleware<ExceptionHandlerMiddleware>();
+
+        // Configure the HTTP request pipeline.
+        if (!app.Environment.IsProduction())
+        {
+            app.UseMiddleware<RequestResponseLoggingMiddleware>();
+            app.UseSwaggerDocumentation();
+        }
+
+        app.UseHttpsRedirection();
+
+        app.MapControllers();
+
+        await app.RunAsync();
+    }
 }
-
-app.UseHttpsRedirection();
-
-app.MapControllers();
-
-await app.RunAsync();

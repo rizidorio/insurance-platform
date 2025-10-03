@@ -63,6 +63,8 @@ public static class DependencyInjection
             .AddPolicyHandler(GetCircuitBreakerPolicy())
             .AddPolicyHandler(GetTimeoutPolicy())
             .AddPolicyHandler(GetFallbackPolicy());
+
+        services.AddScoped<IProposalClientService, ProposalClientService>();
         return services;
     }
 

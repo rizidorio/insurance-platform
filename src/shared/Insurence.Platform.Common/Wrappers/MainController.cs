@@ -61,7 +61,8 @@ public class MainController<TController> : ControllerBase
 
         Logger.LogWarning("Validation failed with errors: {Errors}", string.Join(", ", errors.Select(e => e.Message)));
 
-        return ResponseDefault<TObject>.CreateUnprocessableEntityResponse(errors);
+        var response = ResponseDefault<TObject>.CreateUnprocessableEntityResponse(errors);
+        return UnprocessableEntity(response);
     }
 
     /// <summary>

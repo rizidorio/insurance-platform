@@ -36,7 +36,7 @@ public sealed class Email
         }
         if (!Regex.IsMatch(value, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
         {
-            throw new DomainException("Formato em e-mail inválido", nameof(Email));
+            throw new DomainException("E-mail com formato inválido", nameof(Email));
         }
         Value = value;
     }
