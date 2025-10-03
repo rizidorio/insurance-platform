@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  insurence-postgres:
+    image: postgres:15-alpine
+    container_name: insurence-postgres
+    environment:
+      POSTGRES_DB: insurence_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - insurence_data:/var/lib/postgresql/data
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_broker
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    restart: always
+
+  propostaservice:
+    build:
+      context: .
+      dockerfile: src/proposalService/src/ProposalService.Api/Dockerfile
+    container_name: propostaservice
+    environment:
+      ASPNETCORE_URLS: http://+:5001
+      ConnectionStrings__DefaultConnection: Host=insurence-postgres;Port=5432;Database=insurence_db;Username=postgres;Password=postgres
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: 5672
+    ports:
+      - "5001:5001"
+    depends_on:
+      - insurence-postgres
+      - rabbitmq
+    restart: always
+    command: ["dotnet", "ef", "database", "update", "&&", "dotnet", "run"]
+
+  hiringservice:
+    build:
+      context: .
+      dockerfile: src/hiringService/src/HiringService.Api/Dockerfile
+    container_name: hiringservice
+    environment:
+      ASPNETCORE_URLS: http://+:5002
+      ConnectionStrings__DefaultConnection: Host=insurence-postgres;Port=5432;Database=insurence_db;Username=postgres;Password=postgres
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: 5672
+      ProposalService__Url: http://propostaservice:5001
+    ports:
+      - "5002:5002"
+    depends_on:
+      - insurence-postgres
+      - rabbitmq
+      - propostaservice
+    restart: always
+    command: ["dotnet", "ef", "database", "update", "&&", "dotnet", "run"]
+
+  notificationservice-worker:
+    build:
+      context: .
+      dockerfile: src/notificationService/src/NotificationService.Worker/Dockerfile
+    container_name: notificationservice-worker
+    environment:
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: 5672
+      ConnectionStrings__DefaultConnection: Host=insurence-postgres;Port=5432;Database=insurence_db;Username=postgres;Password=postgres
+    depends_on:
+      - rabbitmq
+      - insurence-postgres
+    restart: always
+    command: ["dotnet", "ef", "database", "update", "&&", "dotnet", "run"]
+
+volumes:
+  insurence_data:
