@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Insurence.Platform.Common.Messaging.RabbitMq.Interfaces.Notification;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProposalService.Application.DataTransferObjects.Requests;
@@ -17,6 +18,7 @@ public sealed class CreateProposalRequestTests
     private readonly Mock<IClientValidation> _clientValidationMock;
     private readonly Mock<IProposalValidation> _proposalValidationMock;
     private readonly Mock<IRiskAnalysisService> _riskAnalysisServiceMock;
+    private readonly Mock<INotificationMessagePublish> _notificationMessagePublishMock;
     private readonly Mock<ILogger<ProposalService.Application.Services.ProposalService>> _loggerMock;
     private readonly ProposalService.Application.Services.ProposalService _proposalServiceMock;
 
@@ -27,6 +29,7 @@ public sealed class CreateProposalRequestTests
         _clientValidationMock = new Mock<IClientValidation>();
         _proposalValidationMock = new Mock<IProposalValidation>();
         _riskAnalysisServiceMock = new Mock<IRiskAnalysisService>();
+        _notificationMessagePublishMock = new Mock<INotificationMessagePublish>();
         _loggerMock = new Mock<ILogger<ProposalService.Application.Services.ProposalService>>();
 
         _proposalServiceMock = new ProposalService.Application.Services.ProposalService(
@@ -35,6 +38,7 @@ public sealed class CreateProposalRequestTests
             riskAnalysisService: _riskAnalysisServiceMock.Object,
             clientRepository: _clientRepositoryMock.Object,
             proposalRepository: _proposalRepositoryMock.Object,
+            notificationMessagePublish: _notificationMessagePublishMock.Object,
             logger: _loggerMock.Object);
     }
 
